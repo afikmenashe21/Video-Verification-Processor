@@ -1,0 +1,19 @@
+[project]
+name = "video-verification-processor"
+version = "1.0.0"
+description = "Video verification processor monorepo — 3 microservices + shared library"
+requires-python = ">=3.11"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov",
+]
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

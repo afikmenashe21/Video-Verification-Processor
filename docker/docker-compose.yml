@@ -1,0 +1,77 @@
+version: "3.8"
+
+services:
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:v24.1.1
+    command:
+      - redpanda
+      - start
+      - --smp 1
+      - --memory 512M
+      - --overprovisioned
+      - --kafka-addr PLAINTEXT://0.0.0.0:29092,OUTSIDE://0.0.0.0:9092
+      - --advertise-kafka-addr PLAINTEXT://redpanda:29092,OUTSIDE://localhost:9092
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    healthcheck:
+      test: ["CMD", "rpk", "cluster", "health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  preprocessor:
+    build:
+      context: ..
+      dockerfile: services/preprocessor/Dockerfile
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: redpanda:29092
+      KAFKA_TOPIC: video.verification.requested.v1
+      KAFKA_GROUP_ID: preprocessor-service
+      FRAMES_BASE_DIR: /data/frames
+      FRAME_SAMPLING_FPS: "1.0"
+      FRAME_SAMPLING_MAX_FRAMES: "16"
+      MAX_VIDEO_SECONDS: "300"
+    volumes:
+      - frames-data:/data/frames
+      - ../test_resources/videos:/data/videos:ro
+      - ../test_resources/images:/data/images:ro
+
+  analyzer:
+    build:
+      context: ..
+      dockerfile: services/analyzer/Dockerfile
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    env_file:
+      - ../.env
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: redpanda:29092
+      KAFKA_TOPIC: video.frames.extracted.v1
+      KAFKA_GROUP_ID: analyzer-service
+      MODEL_DEFAULT: gemini
+    volumes:
+      - frames-data:/data/frames
+      - ../test_resources/images:/data/images:ro
+
+  scorer:
+    build:
+      context: ..
+      dockerfile: services/scorer/Dockerfile
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: redpanda:29092
+      KAFKA_TOPIC: video.analysis.completed.v1
+      KAFKA_GROUP_ID: scorer-service
+      OUTPUT_DIR: /data/output
+    volumes:
+      - ../output:/data/output
+
+volumes:
+  frames-data:

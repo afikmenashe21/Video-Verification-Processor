@@ -1,0 +1,11 @@
+.git
+.idea
+__pycache__
+*.pyc
+tests/
+test_resources/
+.pytest_cache
+.dockerignore
+.env
+claude.md
+output/
