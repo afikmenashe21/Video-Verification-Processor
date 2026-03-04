@@ -8,6 +8,7 @@ TOPIC_REQUESTED = "video.verification.requested.v1"
 TOPIC_FRAMES_EXTRACTED = "video.frames.extracted.v1"
 TOPIC_ANALYSIS_COMPLETED = "video.analysis.completed.v1"
 TOPIC_VERIFICATION_COMPLETED = "video.verification.completed.v1"
+TOPIC_DOWNLOAD_READY = "video.download.ready.v1"
 TOPIC_DLQ = "video.verification.dlq.v1"
 
 EVENT_VERSION = "1"
@@ -22,6 +23,8 @@ class VideoVerificationRequested(BaseModel):
     query: str
     model: str = "gemini"
     metadata: dict[str, str] = Field(default_factory=dict)
+    video_task_id: str | None = None
+    product_id: str | None = None
 
 
 # --- Preprocessor → Analyzer ---
@@ -84,3 +87,13 @@ class VerificationCompleted(BaseModel):
     summary: str
     output_txt_path: str
     output_json_path: str
+
+
+# --- Download pipeline ---
+
+class VideoDownloadReady(BaseModel):
+    task_id: str
+    job_id: str
+    download_url: str
+    source_url: str
+    product_id: str

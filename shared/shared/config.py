@@ -8,3 +8,9 @@ class BaseServiceConfig(BaseSettings):
     kafka_group_id: str = "video-verification-service"
     kafka_auto_offset_reset: str = "earliest"
     dlq_max_retries: int = 3
+
+
+class DatabaseConfig(BaseSettings):
+    model_config = {"env_prefix": "", "case_sensitive": False}
+
+    database_url: str = "postgresql://postgres:postgres@localhost:5432/verification"

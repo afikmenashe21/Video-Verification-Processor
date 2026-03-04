@@ -23,3 +23,13 @@ class StorageError(ServiceError):
 class VideoProcessingError(ServiceError):
     def __init__(self, message: str) -> None:
         super().__init__("VIDEO_PROCESSING_ERROR", message)
+
+
+class DownloadError(ServiceError):
+    def __init__(self, message: str) -> None:
+        super().__init__("DOWNLOAD_ERROR", message)
+
+
+class ApifyError(ServiceError):
+    def __init__(self, message: str) -> None:
+        super().__init__("APIFY_ERROR", message)
